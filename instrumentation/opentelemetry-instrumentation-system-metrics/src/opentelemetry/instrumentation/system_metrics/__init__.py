@@ -196,6 +196,7 @@ class SystemMetricsInstrumentor(BaseInstrumentor):
         self._runtime_memory_labels = self._labels.copy()
         self._runtime_cpu_time_labels = self._labels.copy()
         self._runtime_gc_count_labels = self._labels.copy()
+        self._runtime_gc_collections_labels = self._labels.copy()
         self._runtime_thread_count_labels = self._labels.copy()
         self._runtime_cpu_utilization_labels = self._labels.copy()
         self._runtime_context_switches_labels = self._labels.copy()
@@ -468,6 +469,12 @@ class SystemMetricsInstrumentor(BaseInstrumentor):
                     callbacks=[self._get_runtime_gc_count],
                     description=f"Runtime {self._python_implementation} GC count",
                     unit="By",
+                )
+                self._meter.create_observable_counter(
+                    name=f"process.runtime.{self._python_implementation}.gc_count",
+                    callbacks=[self._get_runtime_gc_collections],
+                    description="The number of times a generation was collected since interpreter start.",
+                    unit="{collection}",
                 )
 
         if "process.runtime.thread_count" in self._config:
@@ -884,6 +891,16 @@ class SystemMetricsInstrumentor(BaseInstrumentor):
         for index, count in enumerate(gc.get_count()):
             self._runtime_gc_count_labels["count"] = str(index)
             yield Observation(count, self._runtime_gc_count_labels.copy())
+
+    def _get_runtime_gc_collections(
+        self, options: CallbackOptions
+    ) -> Iterable[Observation]:
+        """Observer callback for garbage collection"""
+        for index, count in enumerate(gc.get_count()):
+            self._runtime_gc_collections_labels["generation"] = str(index)
+            yield Observation(
+                count, self._runtime_gc_collections_labels.copy()
+            )
 
     def _get_runtime_thread_count(
         self, options: CallbackOptions
