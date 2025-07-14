@@ -29,7 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ([#3567](https://github.com/open-telemetry/opentelemetry-python-contrib/pull/3567))
 - `opentelemetry-resource-detector-containerid`: make it more quiet on platforms without cgroups
   ([#3579](https://github.com/open-telemetry/opentelemetry-python-contrib/pull/3579))
-- `opentelemetry-instrumentation-system-metrics`: Add process.runtime.cpython.gc_count metrics with collection unit is specified in semconv ([3617](https://github.com/open-telemetry/opentelemetry-python-contrib/pull/3617))
+- `opentelemetry-instrumentation-system-metrics`: Add cpython.gc.collections metrics with collection unit is specified in semconv ([3617](https://github.com/open-telemetry/opentelemetry-python-contrib/pull/3617))
 
 ## Version 1.34.0/0.55b0 (2025-06-04)
 

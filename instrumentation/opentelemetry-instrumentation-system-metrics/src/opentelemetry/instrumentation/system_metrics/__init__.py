@@ -44,6 +44,7 @@ following metrics are configured:
         "process.runtime.memory": ["rss", "vms"],
         "process.runtime.cpu.time": ["user", "system"],
         "process.runtime.gc_count": None,
+        "cpython.gc.collections": None,
         "process.runtime.thread_count": None,
         "process.runtime.cpu.utilization": None,
         "process.runtime.context_switches": ["involuntary", "voluntary"],
@@ -136,6 +137,7 @@ _DEFAULT_CONFIG: dict[str, list[str] | None] = {
     "process.runtime.memory": ["rss", "vms"],
     "process.runtime.cpu.time": ["user", "system"],
     "process.runtime.gc_count": None,
+    "cpython.gc.collections": None,
     "process.runtime.thread_count": None,
     "process.runtime.cpu.utilization": None,
     "process.runtime.context_switches": ["involuntary", "voluntary"],
@@ -470,8 +472,15 @@ class SystemMetricsInstrumentor(BaseInstrumentor):
                     description=f"Runtime {self._python_implementation} GC count",
                     unit="By",
                 )
+
+        if "cpython.gc.collections" in self._config:
+            if self._python_implementation == "pypy":
+                _logger.warning(
+                    "The cpython.gc.collections metric won't be collected because the interpreter is PyPy"
+                )
+            else:
                 self._meter.create_observable_counter(
-                    name=f"process.runtime.{self._python_implementation}.gc_count",
+                    name="cpython.gc.collections",
                     callbacks=[self._get_runtime_gc_collections],
                     description="The number of times a generation was collected since interpreter start.",
                     unit="{collection}",

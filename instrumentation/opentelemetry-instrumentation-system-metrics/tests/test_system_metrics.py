@@ -137,7 +137,7 @@ class TestSystemMetrics(TestBase):
                 f"process.runtime.{self.implementation}.gc_count",
             )
             observer_names.append(
-                f"process.runtime.{self.implementation}.gc_count",
+                "cpython.gc.collections",
             )
         if sys.platform != "darwin":
             observer_names.append("system.network.connections")
@@ -958,30 +958,21 @@ class TestSystemMetrics(TestBase):
             f"process.runtime.{self.implementation}.gc_count",
             expected_gc_count,
         )
+
+    @mock.patch("gc.get_count")
+    @skipIf(
+        python_implementation().lower() == "pypy", "not supported for pypy"
+    )
+    def test_runtime_get_gc_collections(self, mock_gc_get_count):
+        mock_gc_get_count.configure_mock(**{"return_value": (1, 2, 3)})
         expected_gc_collections = [
             _SystemMetricsResult({"generation": "0"}, 1),
             _SystemMetricsResult({"generation": "1"}, 2),
             _SystemMetricsResult({"generation": "2"}, 3),
         ]
         self._test_metrics(
-            f"process.runtime.{self.implementation}.gc_collections",
+            "cpython.gc.collections",
             expected_gc_collections,
-        )
-
-    @mock.patch("gc.get_count")
-    @skipIf(
-        python_implementation().lower() == "pypy", "not supported for pypy"
-    )
-    def test_runtime_get_count(self, mock_gc_get_count):
-        mock_gc_get_count.configure_mock(**{"return_value": (1, 2, 3)})
-
-        expected = [
-            _SystemMetricsResult({"count": "0"}, 1),
-            _SystemMetricsResult({"count": "1"}, 2),
-            _SystemMetricsResult({"count": "2"}, 3),
-        ]
-        self._test_metrics(
-            f"process.runtime.{self.implementation}.gc_count", expected
         )
 
     @mock.patch("psutil.Process.num_ctx_switches")
